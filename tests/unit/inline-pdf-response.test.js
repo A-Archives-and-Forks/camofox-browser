@@ -1,11 +1,14 @@
 import { describe, expect, test } from '@jest/globals';
 import { attachNavigationResponseTracker, readInlinePdfResponse } from '../../lib/downloads.js';
 
-function fakeResponse({ url, contentType, body, navigation = true, frame = 'main', status = 200 }) {
+function fakeResponse({ url, contentType, contentLength, body, navigation = true, frame = 'main', status = 200 }) {
+  const headers = {};
+  if (contentType) headers['content-type'] = contentType;
+  if (contentLength !== undefined) headers['content-length'] = String(contentLength);
   return {
     url: () => url,
     status: () => status,
-    headers: () => (contentType ? { 'content-type': contentType } : {}),
+    headers: () => headers,
     body: async () => body,
     request: () => ({
       isNavigationRequest: () => navigation,
@@ -60,6 +63,20 @@ describe('readInlinePdfResponse', () => {
     expect(out.mimeType).toBe('application/pdf');
     expect(out.body.toString()).toBe('%PDF-1.4 body');
     expect(out.status).toBe(200);
+  });
+
+  test('returns the declared size limit before reading an oversized PDF body', async () => {
+    const { tabState, emit } = fakeTabState();
+    attachNavigationResponseTracker(tabState);
+    const pdf = fakeResponse({
+      url: 'https://x/a.pdf',
+      contentType: 'application/pdf',
+      contentLength: 50 * 1024 * 1024 + 1,
+      body: Buffer.alloc(1),
+    });
+    pdf.body = async () => { throw new Error('body should not be read'); };
+    emit('response', pdf);
+    await expect(readInlinePdfResponse(tabState, 'https://x/a.pdf')).resolves.toEqual({ exceedsLimit: true });
   });
 
   test('returns null for html, url mismatch, empty body, body() failure, or no response', async () => {

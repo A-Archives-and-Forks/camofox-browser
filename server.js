@@ -5044,6 +5044,9 @@ app.post('/tabs/:tabId/fetch-current-resource', async (req, res) => {
     let mimeType = null;
     let source = 'navigation_response';
     const inline = await readInlinePdfResponse(tabState, url);
+    if (inline?.exceedsLimit) {
+      return res.status(413).json({ error: `Current resource exceeds ${MAX_FETCHED_RESOURCE_BYTES} byte limit` });
+    }
     if (inline) {
       ({ body, mimeType } = inline);
     } else {
