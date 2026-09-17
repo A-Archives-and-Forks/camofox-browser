@@ -149,6 +149,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "jest": "^30.4.2",
+    "openclaw": "2026.9.4",
     "pngjs": "^7.0.0",
     "typescript": "^5.7.0"
   },
@@ -175,5 +176,13 @@
   "bin": {
     "camofox-browser": "./bin/camofox-browser.js",
     "camofox-browser-mcp": "./mcp/server.mjs"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.9.4"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
   }
 }
