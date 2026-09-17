@@ -64,10 +64,10 @@
       "plugin.js"
     ],
     "compat": {
-      "pluginApi": ">=2026.3.24-beta.2"
+      "pluginApi": ">=2026.9.4"
     },
     "build": {
-      "openclawVersion": "2026.5.3"
+      "openclawVersion": "2026.9.4"
     },
     "tools": [
       {

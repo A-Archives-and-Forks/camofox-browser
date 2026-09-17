@@ -11,6 +11,12 @@ function readJson(rel) {
 }
 
 describe('OpenClaw manifest', () => {
+  test('pins the tested OpenClaw plugin API version in package metadata', () => {
+    const pkg = readJson('package.json');
+
+    expect(pkg.openclaw.compat.pluginApi).toBe('>=2026.9.4');
+    expect(pkg.openclaw.build.openclawVersion).toBe('2026.9.4');
+  });
   test('declares ownership contracts for every canonical tool', () => {
     const manifest = readJson('openclaw.plugin.json');
     const pkg = readJson('package.json');
