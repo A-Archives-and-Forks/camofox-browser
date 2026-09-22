@@ -608,6 +608,13 @@ function navigationRequestTimeoutMs() {
   return Math.max(requestTimeoutMs(), NAVIGATE_TIMEOUT_MS + 5000);
 }
 
+// A tab creation can make one bounded new-page attempt, rebuild the browser
+// session, then make one more. Keep the route deadline outside that recovery
+// budget so a healthy replacement session can return its tab.
+function tabCreateRequestTimeoutMs() {
+  return Math.max(requestTimeoutMs(), (NEW_PAGE_TIMEOUT_MS * 2) + 5000);
+}
+
 const userConcurrency = new Map();
 
 async function withUserLimit(userId, operation) {
@@ -3003,7 +3010,7 @@ app.post('/tabs', async (req, res) => {
         httpStatus: tabState.lastNavigationHttpStatus,
         navigationOk: tabState.lastNavigationHttpStatus === null || tabState.lastNavigationHttpStatus < 400,
       };
-    })(), requestTimeoutMs(), 'tab create');
+    })(), tabCreateRequestTimeoutMs(), 'tab create');
 
     res.json(result);
   } catch (err) {
